@@ -2,6 +2,7 @@
 #define DASHSRV_MCDEF_H__
 
 #include <string>
+#include <cstdint>
 
 namespace Minecraft {
 
