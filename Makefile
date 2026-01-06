@@ -4,7 +4,7 @@ CC=gcc
 CXX=g++
 
 CFLAGS=-Ivendor/mongoose -Ivendor -Wextra -Wall -Iinclude -O2
-CXXFLAGS=$(CFLAGS) -std=c++23
+CXXFLAGS:=$(CFLAGS) -std=c++23
 LDFLAGS=
 
 CFLAGS += -std=c23
