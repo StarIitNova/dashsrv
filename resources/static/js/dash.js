@@ -57,11 +57,10 @@ async function updateServerList() {
         div.classList.add("server");
 
         let ip = "";
-        console.log(server);
         for (const opt of server.ips) {
             if (opt != "127.0.0.1" && opt != "localhost") {
                 ip = opt;
-                break;
+                if (opt.startsWith("192.")) break;
             }
         }
         
@@ -155,7 +154,7 @@ async function main() {
         if (ip == "127.0.0.1") continue;
         if (ip == "0.0.0.0") continue;
         currentIP = ip;
-        break;
+        if (ip.startsWith("192.")) break;
     }
 
     IP.innerText = currentIP;
