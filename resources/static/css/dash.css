@@ -1,0 +1,99 @@
+.minecraft-server-box {
+    width: calc(100% - 50px);
+    height: 75px;
+    border: 2px solid #fff;
+    background: #111111;
+    top: calc(50% + 20px);
+    translate: 0% -50%;
+    position: absolute;
+}
+
+#mc-server-icon {
+    height: 71px;
+    aspect-ratio: 1/1;
+    position: absolute;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#mc-server-title {
+    position: relative;
+    left: 80px;
+    font-size: 1.2rem;
+    max-width: calc(100% - 80px);
+}
+
+#mc-server-motd {
+    position: relative;
+    left: 80px;
+    font-size: 1rem;
+    max-width: calc(100% - 80px);
+    height: 48px;
+}
+
+.mc-motd-disconnected {
+    color: #ff0000;
+}
+
+#mc-players {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
+
+#mc-ping {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+}
+
+.jellyfin-server {
+    width: calc(100% - 50px);
+    height: fit-content;
+    top: calc(50% + 20px);
+    translate: 0% -50%;
+    position: absolute;
+}
+
+#jellyfin-server-name {
+    margin-top: 5px;
+}
+
+#jellyfin-server-name>i {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #aaaabb;
+}
+
+#jellyfin-location {
+    text-decoration: none;
+}
+
+#servers {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.server {
+    border: 2px solid #222233;
+    border-radius: 8px;
+    margin: 25px;
+    padding: 25px;
+    width: 27%;
+    position: relative;
+}
+
+.server-current {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #aaaabb;
+}
+
+.server-cpu, .server-mem {
+    display: inline-block;
+}
+
+.server-mem {
+    position: absolute;
+    right: 25px;
+}

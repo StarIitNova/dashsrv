@@ -1,0 +1,7 @@
+dashsrv
+bin/
+.DS_Store
+compile_commands.json
+.cache
+*.dSYM
+*~

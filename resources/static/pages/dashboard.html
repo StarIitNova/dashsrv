@@ -1,0 +1,85 @@
+<!doctype HTML>
+<html>
+  <head>
+    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <link rel="icon" type="image/png" sizes="64x64" href="static/favicon64x.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="static/favicon32x.png">
+    <link rel="icon" type="image/png" sizes="24x24" href="static/favicon24x.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="static/css/basic.css" media="(min-width: 601px)">
+    <link rel="stylesheet" href="static/css/basic-mobile.css" media="(max-width: 600px)">
+
+    <link rel="stylesheet" href="static/css/dash.css">
+
+    <script src="static/js/dash.js" defer></script>
+  </head>
+  <body>
+    <div class="background">
+      <div class="navbar">
+        <div class="topleft">
+          <h2>Dashsrv</h2>
+          <p id="current-ip">xxx.xxx.x.xxx</p>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="content-section servers">
+          <h1>Servers</h1>
+          <div id="servers">
+            <div class="server">
+              <h2 class="server-ip">192.168.0.105 <i class="server-current">(current)</i></h2>
+              <p class="server-ping">999ms</p>
+              <p class="server-cpu">CPU: 0%</p>
+              <p class="server-mem">MEM: 0%</p>
+            </div>
+
+             <div class="server">
+              <h2 class="server-ip">192.168.1.47</h2>
+              <p class="server-ping">999ms</p>
+              <p class="server-cpu">CPU: 0%</p>
+              <p class="server-mem">MEM: 0%</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-flex">
+          <div class="flex-content-section minecraft">
+            <h1>Minecraft Server</h1>
+            <p id="mc-cache-timer">0:00</p>
+            <div class="minecraft-server-box">
+              <img id="mc-server-icon" alt="icon" src="static/unknown-mc-server.png">
+              <h2 id="mc-server-title" class="mc-font">Minecraft Server</h2>
+              <p id="mc-server-motd" class="mc-font mc-motd-disconnected">Can't connect to server</p>
+
+              <p id="mc-players" class="mc-font">???</p>
+              <p id="mc-ping" class="mc-font">X</p>
+            </div>
+          </div>
+
+          <div class="flex-content-section jellyfin">
+            <h1>Jellyfin</h1>
+            <p id="jellyfin-cache-timer">0:00</p>
+            <div class="jellyfin-server">
+              <h2 id="jellyfin-server-name">Jellyfin <i id="jellyfin-product-name">Jellyfin Server</i></h2>
+              <a href="#" id="jellyfin-location">http://xxx.xxx.x.xxx:pppp/</a>
+              <p id="jellyfin-id">?</p>
+              <p id="jellyfin-version">v??.??.?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
