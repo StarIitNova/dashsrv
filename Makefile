@@ -4,10 +4,10 @@ CC=gcc
 CXX=g++
 
 CFLAGS=-Ivendor/mongoose -Ivendor -Wextra -Wall -Iinclude -O2
-CXXFLAGS:=$(CFLAGS) -std=c++23
+CXXFLAGS:=$(CFLAGS) -std=gnu++23
 LDFLAGS=
 
-CFLAGS += -std=c23
+CFLAGS += -std=gnu23
 
 BIN=bin
 TARGET=dashsrv
