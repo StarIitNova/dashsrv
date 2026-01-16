@@ -7,8 +7,9 @@
 
 #ifdef _WIN32
 #include <iphlpapi.h>
-#include <windows.h>
 #include <winsock2.h>
+
+#include <windows.h>
 #else
 #include <arpa/inet.h>
 #include <ifaddrs.h>
