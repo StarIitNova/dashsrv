@@ -13,7 +13,8 @@ All files in these should be mostly independent of the rest of the system.
 Dashsrv is easy to configure, just add a file named `config.json` in the `resources/` directory. If it doesn't exist when Dashsrv is first ran,
 it will be automatically generated.
 
-Basic configuration: ```json
+Basic configuration:
+```json
 {
     "hostip": "0.0.0.0",
     "hostport": "80",
@@ -31,7 +32,8 @@ Basic configuration: ```json
             "port": 80
         }
     ]
-}```
+}
+```
 
 Configuration options:
 - `hostip`: The ip to host on. Recommended and default is "0.0.0.0", but you can change this to "127.0.0.1" if you don't wish for the dashboard to be hosted on the LAN.
