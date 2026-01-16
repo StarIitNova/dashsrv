@@ -14,6 +14,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 struct JellyfinStatus {
@@ -406,6 +407,11 @@ std::string HealthReportToJSON(const DashboardHealthStatus &status, bool cached)
         data += DashboardStatusToJSON(status.Statuses[i], cached);
     }
 
-    return std::format(R"({{"cached":{},"cacheTiming":{},"data":[{}]}})", cached ? "true" : "false",
-                       MeshCache.GetTiming(), data);
+    std::stringstream ss;
+    ss << "{";
+    ss << "\"cached\":" << (cached ? true : false) << ",";
+    ss << "\"cacheTiming\":" << MeshCache.GetTiming() << ",";
+    ss << "\"data\":[" << data << "]";
+    ss << "}";
+    return ss.str();
 }
