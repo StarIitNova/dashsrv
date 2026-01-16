@@ -89,12 +89,15 @@ int mdns_callback(int /*sock*/, const struct sockaddr * /*from*/, size_t /*addrl
     return 0;
 }
 
-std::unordered_map<std::string, std::string> cachedMDNSResolutions;
+std::unordered_map<std::string, std::string> &CachedMDNSResolutions() {
+    static std::unordered_map<std::string, std::string> cachedMDNSResolutions;
+    return cachedMDNSResolutions;
+}
 
 // Cross-platform mDNS resolver
 std::string ResolveMDNS(const std::string &hostname, int timeout_ms) {
-    if (cachedMDNSResolutions.contains(hostname)) {
-        return cachedMDNSResolutions[hostname];
+    if (CachedMDNSResolutions().contains(hostname)) {
+        return CachedMDNSResolutions()[hostname];
     }
 
 #ifdef _WIN32
@@ -145,6 +148,6 @@ std::string ResolveMDNS(const std::string &hostname, int timeout_ms) {
 #endif
 
     if (!result.empty())
-        cachedMDNSResolutions[hostname] = result;
+        CachedMDNSResolutions()[hostname] = result;
     return result;
 }
