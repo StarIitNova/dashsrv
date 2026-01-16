@@ -39,4 +39,5 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 iphlpapi)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _WIN32_WINNT=0x0600)
 endif()

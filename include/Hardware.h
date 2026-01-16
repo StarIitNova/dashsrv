@@ -6,10 +6,12 @@
 #include <vector>
 
 #ifdef _WIN32
-#include <iphlpapi.h>
+// clang-format off
 #include <winsock2.h>
-
+#include <ws2tcpip.h>
 #include <windows.h>
+#include <iphlpapi.h>
+// clang-format on
 #else
 #include <arpa/inet.h>
 #include <ifaddrs.h>
