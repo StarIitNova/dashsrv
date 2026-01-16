@@ -1,18 +1,16 @@
 #ifndef DASHSRV_HARDWARE_H__
 #define DASHSRV_HARDWARE_H__
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #ifdef _WIN32
-#include <winsock2.h>
 #include <iphlpapi.h>
 #include <windows.h>
-#pragma comment(lib, "iphlpapi.lib")
-#pragma comment(lib, "ws2_32.lib")
+#include <winsock2.h>
 #else
-#include <ifaddrs.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 #include <unistd.h>
 #endif
 
@@ -26,15 +24,15 @@ std::vector<std::string> GetLocalIPs();
 MemoryInfo GetMemoryUsage();
 
 class CPUUsage {
-public:
+  public:
     CPUUsage();
     void Tick();
     double GetCPUUsage() const;
 
-private:
+  private:
 #ifdef _WIN32
     FILETIME prevIdleTime, prevKernelTime, prevUserTime;
-    ULONGLONG FileTimeToULL(const FILETIME& ft) const;
+    ULONGLONG FileTimeToULL(const FILETIME &ft) const;
 #elif defined(__APPLE__)
     unsigned long long prevIdleTicks = 0;
     unsigned long long prevTotalTicks = 0;

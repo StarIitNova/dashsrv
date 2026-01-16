@@ -38,5 +38,5 @@ set(SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 iphlpapi)
 endif()

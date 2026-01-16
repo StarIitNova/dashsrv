@@ -11,7 +11,7 @@ HttpMethod parseHttpMethod(const std::string &method) {
     if (method == "PUT")
         return HttpMethod::PUT;
     if (method == "DELETE")
-        return HttpMethod::DELETE;
+        return HttpMethod::DELETE_;
     if (method == "PATCH")
         return HttpMethod::PATCH;
     if (method == "HEAD")

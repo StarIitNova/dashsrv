@@ -6,7 +6,7 @@
 
 #include <mongoose.h>
 
-enum class HttpMethod { HEAD, GET, DELETE, POST, PUT, CONNECT, OPTIONS, TRACE, PATCH };
+enum class HttpMethod { HEAD, GET, DELETE_, POST, PUT, CONNECT, OPTIONS, TRACE, PATCH };
 
 struct RequestData {
     std::string url;
