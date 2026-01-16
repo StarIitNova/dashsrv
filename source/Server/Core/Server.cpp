@@ -8,27 +8,25 @@
 
 #include <mongoose.h>
 
+#include <filesystem>
+#include <fstream>
 #include <print>
 #include <sstream>
-#include <fstream>
-#include <filesystem>
 
 namespace fs = std::filesystem;
 
 std::string getMGEventString(int ev);
 
-void mg_http_reply_nolen(struct mg_connection *c, int code, const std::string &headers, const void *body, size_t body_len) {
-    std::string resp = "HTTP/1.1 " + std::to_string(code) + " " +
-                       mg_http_status_code_str(code) + "\r\n" +
-                       headers +
-                       "\r\n";
+void mg_http_reply_nolen(struct mg_connection *c, int code, const std::string &headers, const void *body,
+                         size_t body_len) {
+    std::string resp =
+        "HTTP/1.1 " + std::to_string(code) + " " + mg_http_status_code_str(code) + "\r\n" + headers + "\r\n";
     mg_send(c, resp.data(), resp.size());
     if (body_len > 0 && body != nullptr) {
         mg_send(c, body, body_len);
     }
     c->is_resp = 0;
 }
-
 
 void ev_handler(struct mg_connection *c, int ev, void *ev_data) {
     NoreServer *server = (NoreServer *)c->fn_data;
@@ -150,7 +148,7 @@ void ev_handler(struct mg_connection *c, int ev, void *ev_data) {
             server->mWSReverseLookup.erase(id);
 
             std::println("Websocket connection {} closed", id);
-            
+
             if (server->mWSClose) {
                 server->mWSClose(id);
             }
@@ -173,7 +171,8 @@ void NoreServer::run() {
     struct mg_connection *c = mg_http_listen(&mgr, mHostAddress.c_str(), ev_handler, this);
 
     if (mHostAddress.starts_with("https://") || mHostAddress.starts_with("wss://")) {
-        struct mg_tls_opts opts = { .cert = {(char *)"resources/server.crt", 20 }, .key = {(char *)"resources/server.key", 20} };
+        struct mg_tls_opts opts = { .cert = { (char *)"resources/server.crt", 20 },
+                                    .key = { (char *)"resources/server.key", 20 } };
         mg_tls_init(c, &opts);
     }
 
@@ -284,13 +283,22 @@ void ResponseData::respondFile(const std::string &filepath) {
     ss << file.rdbuf();
     body = ss.str();
 
-    if (filepath.ends_with(".html")) content_type = "text/html";
-    else if (filepath.ends_with(".css")) content_type = "text/css";
-    else if (filepath.ends_with(".js")) content_type = "application/javascript";
-    else if (filepath.ends_with(".png")) content_type = "image/png";
-    else if (filepath.ends_with(".jpg") || filepath.ends_with(".jpeg")) content_type = "image/jpeg";
-    else if (filepath.ends_with(".txt")) content_type = "text/plain";
-    else content_type = "application/octet-stream";
+    file.close();
+
+    if (filepath.ends_with(".html"))
+        content_type = "text/html";
+    else if (filepath.ends_with(".css"))
+        content_type = "text/css";
+    else if (filepath.ends_with(".js"))
+        content_type = "application/javascript";
+    else if (filepath.ends_with(".png"))
+        content_type = "image/png";
+    else if (filepath.ends_with(".jpg") || filepath.ends_with(".jpeg"))
+        content_type = "image/jpeg";
+    else if (filepath.ends_with(".txt"))
+        content_type = "text/plain";
+    else
+        content_type = "application/octet-stream";
 
     status = 200;
     handled = true;
@@ -319,7 +327,7 @@ std::string constructResponseHeaders(const ResponseData &res) {
             headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
         }
     }
-    
+
     if (!headers.contains("Content-Security-Policy")) {
         headers["Content-Security-Policy"] = "default-src 'self'";
     }

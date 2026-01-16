@@ -1,20 +1,20 @@
-#include "Basic.h"
 #include <Server/Routes.h>
 
-#include <Server/Core/Routing.h>
 #include <Server/CacheContainer.h>
+#include <Server/Config.h>
+#include <Server/Core/Routing.h>
 
 #include <Minecraft/MCDef.h>
 #include <Minecraft/Status.h>
 
-#include <MGClient.h>
 #include <Hardware.h>
+#include <MGClient.h>
 
 #include <nlohmann/json.hpp>
 
+#include <cmath>
 #include <print>
 #include <string>
-#include <cmath>
 
 struct JellyfinStatus {
     bool Online;
@@ -52,12 +52,8 @@ static CacheContainer<DashboardHealthStatus, 5000> MeshCache;
 
 static double LastValidCPUUsage = 0.0;
 
-static const Minecraft::MCServer MinecraftServer{ "192.168.0.105", 25565, 774 };
-static const std::string MinecraftDomain = "copyright-postings.gl.joinmc.link";
-
-static const std::string JellyfinIP = "192.168.1.47:8096";
-
-static const std::vector<std::string> NetworkServerIPs = { "192.168.0.105", "192.168.1.47" };
+static const DashsrvConfig DashConfig("resources/config.json");
+static DashsrvConfigServer *MinecraftInfo, *JellyfinInfo;
 
 JellyfinStatus GetJellyfinStatus();
 DashboardStatus GetDashboardStatus();
@@ -70,37 +66,60 @@ std::string HealthReportToJSON(const DashboardHealthStatus &status, bool cached)
 
 bool handleRoutes(const RequestData &req, ResponseData &res) {
     res.status = 0;
-    ROUTE("/api") {
-        GET("/mc") {
-            bool cached = true;
-            if (ServerCache.NeedsFetch()) {
-                Minecraft::MCStatus fetched = Minecraft::QueryServer(MinecraftServer);
-                ServerCache.Cache(fetched);
-                cached = false;
+
+    static bool scannedConfig = false;
+    if (!scannedConfig) {
+        for (auto &server : DashConfig.servers) {
+            if (server.type == "minecraft") {
+                MinecraftInfo = const_cast<DashsrvConfigServer *>(&server);
             }
 
-            const Minecraft::MCStatus &status = ServerCache.Get();
-
-            res.content_type = "application/json";
-            res.body = MCStatusToJSON(status, cached);
-            res.status = 200;
-            res.handled = true;
+            if (server.type == "jellyfin") {
+                JellyfinInfo = const_cast<DashsrvConfigServer *>(&server);
+            }
         }
 
-        GET("/jellyfin") {
-            bool cached = true;
-            if (JellyfinCache.NeedsFetch()) {
-                JellyfinStatus fetched = GetJellyfinStatus();
-                JellyfinCache.Cache(fetched);
-                cached = false;
+        scannedConfig = true;
+    }
+
+    ROUTE("/api") {
+        if (MinecraftInfo != nullptr) {
+            GET("/mc") {
+                bool cached = true;
+                if (ServerCache.NeedsFetch()) {
+                    DashsrvConfigServer::Minecraft mci =
+                        std::get<DashsrvConfigServer::Minecraft>(MinecraftInfo->server);
+                    Minecraft::MCServer server{ mci.ip, (uint16_t)mci.port, (uint32_t)mci.version };
+                    Minecraft::MCStatus fetched = Minecraft::QueryServer(server);
+                    ServerCache.Cache(fetched);
+                    cached = false;
+                }
+
+                const Minecraft::MCStatus &status = ServerCache.Get();
+
+                res.content_type = "application/json";
+                res.body = MCStatusToJSON(status, cached);
+                res.status = 200;
+                res.handled = true;
             }
+        }
 
-            const JellyfinStatus &status = JellyfinCache.Get();
+        if (JellyfinInfo != nullptr) {
+            GET("/jellyfin") {
+                bool cached = true;
+                if (JellyfinCache.NeedsFetch()) {
+                    JellyfinStatus fetched = GetJellyfinStatus();
+                    JellyfinCache.Cache(fetched);
+                    cached = false;
+                }
 
-            res.content_type = "application/json";
-            res.body = JellyfinStatusToJSON(status, cached);
-            res.status = 200;
-            res.handled = true;
+                const JellyfinStatus &status = JellyfinCache.Get();
+
+                res.content_type = "application/json";
+                res.body = JellyfinStatusToJSON(status, cached);
+                res.status = 200;
+                res.handled = true;
+            }
         }
 
         GET("/status") {
@@ -128,7 +147,7 @@ bool handleRoutes(const RequestData &req, ResponseData &res) {
             }
 
             DashboardStatus status = HardwareCache.Get();
-            
+
             res.content_type = "application/json";
             res.body = DashboardStatusToJSON(status, cached);
             res.status = 200;
@@ -138,12 +157,12 @@ bool handleRoutes(const RequestData &req, ResponseData &res) {
 
     GET("/") {
         res.respondFile("resources/static/pages/dashboard.html");
-        res.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;";
+        res.headers["Content-Security-Policy"] =
+            "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' "
+            "https://fonts.gstatic.com;";
     }
 
-    GET("/favicon.ico") {
-        res.respondFile("resources/static/favicon24x.png");
-    }
+    GET("/favicon.ico") { res.respondFile("resources/static/favicon24x.png"); }
 
     if (req.path.starts_with("/static")) {
         res.respondDirectory("resources/static/", "/static", req.url);
@@ -159,20 +178,23 @@ bool handleRoutes(const RequestData &req, ResponseData &res) {
 }
 
 JellyfinStatus GetJellyfinStatus() {
+    DashsrvConfigServer::Jellyfin jfi = std::get<DashsrvConfigServer::Jellyfin>(JellyfinInfo->server);
+    std::string jellyfinIP = jfi.ip + ":" + std::to_string(jfi.port);
+
     JellyfinStatus status;
     status.Online = false;
 
     do {
-        MGResponse healthRes = Dashcli::Get(JellyfinIP + "/health");
+        MGResponse healthRes = Dashcli::Get(jellyfinIP + "/health");
         if (!healthRes.Success) {
             status.Online = false;
             break;
         }
-                    
+
         std::string healthstr(healthRes.Recv.begin(), healthRes.Recv.end());
         status.Health = healthstr;
 
-        MGResponse jsonRes = Dashcli::Get(JellyfinIP + "/System/Info/Public");
+        MGResponse jsonRes = Dashcli::Get(jellyfinIP + "/System/Info/Public");
         if (!jsonRes.Success) {
             status.Online = false;
             break;
@@ -209,7 +231,7 @@ DashboardStatus GetDashboardStatus() {
     DashboardStatus result;
     std::vector<std::string> ips = GetLocalIPs();
     MemoryInfo mem = GetMemoryUsage();
-    
+
     double cpu = gCPUUsage.GetCPUUsage();
     while (!std::isfinite(cpu) && LastValidCPUUsage == 0.0) {
         cpu = gCPUUsage.GetCPUUsage();
@@ -234,11 +256,19 @@ DashboardHealthStatus GetHealthReport() {
     if (HardwareCache.NeedsFetch()) {
         HardwareCache.Cache(GetDashboardStatus());
     }
-    
+
     DashboardStatus self = HardwareCache.Get();
     health.Statuses.push_back(self);
-    
-    for (const auto &server : NetworkServerIPs) {
+
+    for (const auto &serverInfo : DashConfig.servers) {
+        if (serverInfo.type != "dashboard")
+            continue;
+
+        DashsrvConfigServer::Dashboard dbi = std::get<DashsrvConfigServer::Dashboard>(serverInfo.server);
+        std::string server = dbi.ip;
+        if (dbi.port != 80)
+            server += ":" + std::to_string(dbi.port);
+
         bool isSelf = false;
         for (const auto &ip : self.IPs) {
             if (ip == server) {
@@ -247,7 +277,8 @@ DashboardHealthStatus GetHealthReport() {
             }
         }
 
-        if (isSelf) continue;
+        if (isSelf)
+            continue;
 
         DashboardStatus status;
         status.IPs.push_back(server);
@@ -255,6 +286,7 @@ DashboardHealthStatus GetHealthReport() {
         uint64_t start = GetTimeMillis();
         MGResponse healthRes = Dashcli::Get(server + "/api/local");
         if (!healthRes.Success) {
+            std::println("Received unsuccessful response from {} during health check ({})", server, healthRes.Reason);
             status.Online = false;
             health.Statuses.push_back(status);
             continue;
@@ -264,6 +296,7 @@ DashboardHealthStatus GetHealthReport() {
         nlohmann::json json = nlohmann::json::parse(sv);
 
         if (json.is_discarded()) {
+            std::println("Received bad json from {} during health check", server);
             status.Online = false;
             health.Statuses.push_back(status);
             break;
@@ -292,15 +325,17 @@ DashboardHealthStatus GetHealthReport() {
 }
 
 std::string MCStatusToJSON(const Minecraft::MCStatus &status, bool cached) {
+    DashsrvConfigServer::Minecraft mci = std::get<DashsrvConfigServer::Minecraft>(MinecraftInfo->server);
+
     try {
         nlohmann::json json;
         json["cached"] = cached;
         json["cacheTiming"] = ServerCache.GetTiming();
         json["online"] = status.Online;
-        json["ip"] = MinecraftServer.IP;
-        json["domain"] = MinecraftDomain;
-        json["port"] = MinecraftServer.Port;
-        json["requestProtocol"] = MinecraftServer.ProtocolVersion;
+        json["ip"] = mci.ip;
+        json["domain"] = mci.extraDomain;
+        json["port"] = mci.port;
+        json["requestProtocol"] = mci.version;
         if (status.Online) {
             json["version"]["name"] = status.Version.Name;
             json["version"]["protocol"] = status.Version.Protocol;
@@ -353,11 +388,12 @@ std::string DashboardStatusToJSON(const DashboardStatus &status, bool cached) {
             } else {
                 json["cpu"] = LastValidCPUUsage;
             }
-            
+
             json["ping"] = status.Ping;
             json["memory"]["available"] = status.Memory.Available;
             json["memory"]["total"] = status.Memory.Total;
-            json["memory"]["usage"] = (double)(status.Memory.Total - status.Memory.Available) / (double)status.Memory.Total;
+            json["memory"]["usage"] =
+                (double)(status.Memory.Total - status.Memory.Available) / (double)status.Memory.Total;
             json["self"] = status.IsCurrent;
         }
 
@@ -371,9 +407,11 @@ std::string DashboardStatusToJSON(const DashboardStatus &status, bool cached) {
 std::string HealthReportToJSON(const DashboardHealthStatus &status, bool cached) {
     std::string data = "";
     for (size_t i = 0; i < status.Statuses.size(); ++i) {
-        if (i != 0) data += ",";
+        if (i != 0)
+            data += ",";
         data += DashboardStatusToJSON(status.Statuses[i], cached);
     }
-    
-    return std::format(R"({{"cached":{},"cacheTiming":{},"data":[{}]}})", cached ? "true" : "false", MeshCache.GetTiming(), data);
+
+    return std::format(R"({{"cached":{},"cacheTiming":{},"data":[{}]}})", cached ? "true" : "false",
+                       MeshCache.GetTiming(), data);
 }

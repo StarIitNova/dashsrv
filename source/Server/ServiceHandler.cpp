@@ -1,7 +1,8 @@
 #include <Server/ServiceHandler.h>
 
-#include <Server/Routes.h>
 #include <Basic.h>
+#include <Server/Config.h>
+#include <Server/Routes.h>
 
 #include <print>
 
@@ -11,7 +12,26 @@ ServiceHandler::~ServiceHandler() {
 }
 
 void ServiceHandler::init() {
-    mServer = new NoreServer("http://0.0.0.0:80", handleRoutes);
+    DashsrvConfig config("resources/config.json");
+    std::println("Loaded configuration 'resources/config.json':");
+    std::println("  IP: {}:{}", config.ip, config.port);
+    std::println("  Servers: {}", config.servers.size());
+    for (const auto &server : config.servers) {
+        std::string ip, port;
+        if (server.type == "minecraft") {
+            ip = std::get<DashsrvConfigServer::Minecraft>(server.server).ip;
+            port = std::to_string(std::get<DashsrvConfigServer::Minecraft>(server.server).port);
+        } else if (server.type == "jellyfin") {
+            ip = std::get<DashsrvConfigServer::Jellyfin>(server.server).ip;
+            port = std::to_string(std::get<DashsrvConfigServer::Jellyfin>(server.server).port);
+        } else if (server.type == "dashboard") {
+            ip = std::get<DashsrvConfigServer::Dashboard>(server.server).ip;
+            port = std::to_string(std::get<DashsrvConfigServer::Dashboard>(server.server).port);
+        }
+        std::println("    {} {}:{}", server.type, ip, port);
+    }
+
+    mServer = new NoreServer("http://" + config.ip + ":" + std::to_string(config.port), handleRoutes);
 }
 
 void ServiceHandler::run() {

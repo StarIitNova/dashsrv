@@ -1,9 +1,9 @@
 #ifndef DASHSRV_MGCLIENT_H__
 #define DASHSRV_MGCLIENT_H__
 
-#include <vector>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 struct MGResponse {
     std::string URL;
@@ -13,11 +13,13 @@ struct MGResponse {
 
     bool Success = true;
     bool Done = false;
+
+    std::string Reason;
 };
 
 namespace Dashcli {
 
-    MGResponse Get(std::string url);
+MGResponse Get(std::string url);
 
 }
 

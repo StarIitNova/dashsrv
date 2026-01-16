@@ -3,7 +3,7 @@ MONGOOSE_C=vendor/mongoose/mongoose.c
 CC=gcc
 CXX=g++
 
-CFLAGS=-Ivendor/mongoose -Ivendor -Wextra -Wall -Iinclude -O2
+CFLAGS=-Ivendor/mongoose -Ivendor -Wextra -Wall -Iinclude -O2 -g
 CXXFLAGS:=$(CFLAGS) -std=gnu++23
 LDFLAGS=
 
@@ -14,7 +14,7 @@ TARGET=dashsrv
 
 SOURCES=source/Dashsrv.cpp source/Basic.cpp source/MGClient.cpp source/Hardware.cpp \
 	source/Server/ServiceHandler.cpp source/Server/Routes.cpp \
-	source/Server/Core/HTTP.cpp source/Server/Core/Rand.cpp source/Server/Core/Server.cpp \
+	source/Server/Core/HTTP.cpp source/Server/Core/Rand.cpp source/Server/Core/Server.cpp source/Server/Config.cpp \
 	source/Minecraft/MCPacket.cpp source/Minecraft/MCQuery.cpp source/Minecraft/Status.cpp source/Minecraft/String.cpp \
 	$(MONGOOSE_C)
 
