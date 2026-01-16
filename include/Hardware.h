@@ -1,6 +1,7 @@
 #ifndef DASHSRV_HARDWARE_H__
 #define DASHSRV_HARDWARE_H__
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
