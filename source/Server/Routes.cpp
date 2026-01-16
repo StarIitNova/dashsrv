@@ -13,7 +13,7 @@
 #include <nlohmann/json.hpp>
 
 #include <cmath>
-#include <print>
+#include <iostream>
 #include <string>
 
 struct JellyfinStatus {
@@ -218,7 +218,7 @@ JellyfinStatus GetJellyfinStatus() {
             status.ID = json["Id"];
             status.StartupWizardComplete = json["StartupWizardCompleted"];
         } catch (const std::exception &e) {
-            std::println("Caught exception while parsing jellyfin status JSON");
+            std::cout << "Caught exception while parsing jellyfin status JSON\n";
             status.Online = false;
             return status;
         }
@@ -286,7 +286,6 @@ DashboardHealthStatus GetHealthReport() {
         uint64_t start = GetTimeMillis();
         MGResponse healthRes = Dashcli::Get(server + "/api/local");
         if (!healthRes.Success) {
-            std::println("Received unsuccessful response from {} during health check ({})", server, healthRes.Reason);
             status.Online = false;
             health.Statuses.push_back(status);
             continue;
@@ -296,7 +295,6 @@ DashboardHealthStatus GetHealthReport() {
         nlohmann::json json = nlohmann::json::parse(sv);
 
         if (json.is_discarded()) {
-            std::println("Received bad json from {} during health check", server);
             status.Online = false;
             health.Statuses.push_back(status);
             break;
@@ -312,7 +310,6 @@ DashboardHealthStatus GetHealthReport() {
             status.Ping = GetTimeMillis() - start;
             health.Statuses.push_back(status);
         } catch (const std::exception &e) {
-            std::println("Caught exception while parsing server status JSON");
             status.Online = false;
             status.IPs.clear();
             status.IPs.push_back(server);
@@ -348,7 +345,6 @@ std::string MCStatusToJSON(const Minecraft::MCStatus &status, bool cached) {
 
         return json.dump();
     } catch (const std::exception &e) {
-        std::println("Caught exception while generating MC status JSON");
         return "{}";
     }
 }
@@ -370,7 +366,6 @@ std::string JellyfinStatusToJSON(const JellyfinStatus &status, bool cached) {
 
         return json.dump();
     } catch (const std::exception &e) {
-        std::println("Caught exception while generation Jellyfin status JSON");
         return "{}";
     }
 }
@@ -399,7 +394,6 @@ std::string DashboardStatusToJSON(const DashboardStatus &status, bool cached) {
 
         return json.dump();
     } catch (const std::exception &e) {
-        std::println("Caught exception while generating dashboard status JSON");
         return "{}";
     }
 }

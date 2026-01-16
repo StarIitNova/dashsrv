@@ -10,7 +10,7 @@
 
 #include <filesystem>
 #include <fstream>
-#include <print>
+#include <iostream>
 #include <sstream>
 
 namespace fs = std::filesystem;
@@ -32,7 +32,7 @@ void ev_handler(struct mg_connection *c, int ev, void *ev_data) {
     NoreServer *server = (NoreServer *)c->fn_data;
 
     if (ev != MG_EV_POLL) {
-        // std::println("Catching request {}", getMGEventString(ev));
+        // std::cout << "Catching request " << getMGEventString(ev) << "\n";
     }
 
     if (ev == MG_EV_HTTP_MSG) {
@@ -50,7 +50,6 @@ void ev_handler(struct mg_connection *c, int ev, void *ev_data) {
         }
 
         if (req.url == "/ws") {
-            std::println("Upgrade requested");
             mg_ws_upgrade(c, hm, NULL);
             return;
         }
@@ -107,8 +106,6 @@ void ev_handler(struct mg_connection *c, int ev, void *ev_data) {
             }
         }
 
-        // std::println("    Receiving request {} {} from {}", method, req.path, req.remote_address);
-
         ResponseData res;
         server->onRequest(req, res);
 
@@ -127,8 +124,6 @@ void ev_handler(struct mg_connection *c, int ev, void *ev_data) {
         server->mWSIds[c] = id;
         server->mWSReverseLookup[id] = c;
 
-        std::println("Websocket connection opened for client {}", id);
-
         if (server->mWSConnect) {
             server->mWSConnect(id);
         }
@@ -146,8 +141,6 @@ void ev_handler(struct mg_connection *c, int ev, void *ev_data) {
             std::string id = server->mWSIds[c];
             server->mWSIds.erase(c);
             server->mWSReverseLookup.erase(id);
-
-            std::println("Websocket connection {} closed", id);
 
             if (server->mWSClose) {
                 server->mWSClose(id);
@@ -176,7 +169,7 @@ void NoreServer::run() {
         mg_tls_init(c, &opts);
     }
 
-    std::println("\nServer running on {}\n", mHostAddress);
+    std::cout << "\nServer running on " << mHostAddress << "\n\n";
     for (;;) {
         gCPUUsage.Tick();
         mg_mgr_poll(&mgr, 1000);

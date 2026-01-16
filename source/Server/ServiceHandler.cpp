@@ -4,7 +4,7 @@
 #include <Server/Config.h>
 #include <Server/Routes.h>
 
-#include <print>
+#include <iostream>
 
 ServiceHandler::~ServiceHandler() {
     if (mServer)
@@ -13,9 +13,9 @@ ServiceHandler::~ServiceHandler() {
 
 void ServiceHandler::init() {
     DashsrvConfig config("resources/config.json");
-    std::println("Loaded configuration 'resources/config.json':");
-    std::println("  IP: {}:{}", config.ip, config.port);
-    std::println("  Servers: {}", config.servers.size());
+    std::cout << "Loaded configuration 'resources/config.json':\n";
+    std::cout << "  IP: " << config.ip << ":" << config.port << "\n";
+    std::cout << "  Servers: " << config.servers.size() << "\n";
     for (const auto &server : config.servers) {
         std::string ip, port;
         if (server.type == "minecraft") {
@@ -28,7 +28,7 @@ void ServiceHandler::init() {
             ip = std::get<DashsrvConfigServer::Dashboard>(server.server).ip;
             port = std::to_string(std::get<DashsrvConfigServer::Dashboard>(server.server).port);
         }
-        std::println("    {} {}:{}", server.type, ip, port);
+        std::cout << "    " << server.type << " " << ip << ":" << port << "\n";
     }
 
     mServer = new NoreServer("http://" + config.ip + ":" + std::to_string(config.port), handleRoutes);
