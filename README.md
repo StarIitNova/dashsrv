@@ -17,7 +17,7 @@ Basic configuration:
 ```json
 {
     "hostip": "0.0.0.0",
-    "hostport": "80",
+    "hostport": 80,
     "servers": [
         {
             "type": "minecraft",
